@@ -366,6 +366,8 @@ services:
       - "3000:443"
     depends_on:
       - api-server
+    volumes:                                                                                                                                                                           
+      - ./certs:/etc/nginx/ssl                                                                                                                                                                            - ./certs:/etc/nginx/ssl
 
   postgres:
     image: timescale/timescaledb:latest-pg16
