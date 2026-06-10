@@ -1,52 +1,20 @@
 #!/bin/bash
 
 # ============================================================
-# OGWAF Installer & Updater v2.0
+# OGWAF Installer & Updater
 # Fresh install: curl -sSL https://install.origrata.com/ogtech-waf.sh | bash -s -- --email user@example.com --password pass
 # Update only:   curl -sSL https://install.origrata.com/ogtech-waf.sh | bash -s -- --update
 # ============================================================
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; NC='\033[0m'
-BOLD='\033[1m'
 INSTALL_DIR="/opt/ogwaf"
 WAF_SERVER="https://waf-key.origrata.com/api/v1"
 REGISTRY="ghcr.io/origrata"
 MODE="install"
 
-# Progress bar function
-show_progress() {
-    local current=$1
-    local total=$2
-    local width=50
-    local percentage=$((current * 100 / total))
-    local completed=$((width * current / total))
-    local remaining=$((width - completed))
-    
-    printf "\r  [${GREEN}"
-    printf "%${completed}s" | tr ' ' '='
-    printf "${NC}"
-    printf "%${remaining}s" | tr ' ' ' '
-    printf "] ${GREEN}%3d%%${NC}" "$percentage"
-}
-
-# Spinner function for indeterminate progress
-show_spinner() {
-    local pid=$1
-    local delay=0.1
-    local spinstr='|/-\'
-    while ps -p "$pid" > /dev/null 2>&1; do
-        local temp=${spinstr#?}
-        printf " [%c]  " "$spinstr"
-        local spinstr=$temp${spinstr%"$temp"}
-        sleep $delay
-        printf "\b\b\b\b\b\b"
-    done
-    printf "    \b\b\b\b"
-}
-
 echo -e "${GREEN}"
 echo "╔══════════════════════════════════════════════╗"
-echo "║         OGWAF Installer v2.0                 ║"
+echo "║         OGWAF Installer v1.1                 ║"
 echo "║   Advanced Web Application Firewall          ║"
 echo "╚══════════════════════════════════════════════╝"
 echo -e "${NC}"
@@ -89,24 +57,10 @@ if [ "$MODE" = "update" ]; then
   cd "$INSTALL_DIR" 2>/dev/null || { echo -e "${RED}✗ OGWAF not installed at $INSTALL_DIR${NC}"; exit 1; }
 
   echo -e "${YELLOW}→ Pulling latest images...${NC}"
-  
-  # Pull with progress for update mode
-  IMAGES=("waf-core" "api-server" "frontend")
-  TOTAL_IMAGES=${#IMAGES[@]}
-  CURRENT=0
-  
-  for img in "${IMAGES[@]}"; do
-    CURRENT=$((CURRENT + 1))
-    echo -ne "  Pulling $img... "
-    if docker compose pull -q "$img" 2>/dev/null; then
-      echo -e "${GREEN}✓${NC}"
-    else
-      echo -e "${RED}✗ Failed${NC}"
-      exit 1
-    fi
-    show_progress "$CURRENT" "$TOTAL_IMAGES"
-    echo ""
-  done
+  if ! docker compose pull -q waf-core api-server frontend; then
+    echo -e "${RED}✗ Failed to pull images${NC}"
+    exit 1
+  fi
 
   echo -e "${YELLOW}→ Recreating services...${NC}"
   if ! docker compose up -d --force-recreate --no-deps waf-core api-server frontend; then
@@ -179,6 +133,7 @@ fi
 install_docker_rhel() {
   dnf install -y -q dnf-utils
   dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  # Rocky Linux / AlmaLinux / RHEL 9+ needs the centos repo alias
   if grep -qi "rocky\|almalinux\|rhel" /etc/os-release 2>/dev/null; then
     sed -i 's/^\$releasever/9/g' /etc/yum.repos.d/docker-ce.repo 2>/dev/null || true
   fi
@@ -208,13 +163,17 @@ fi
 # ─── Install Docker Compose ───
 if ! docker compose version &>/dev/null; then
   echo "Installing Docker Compose plugin..."
+
   if command -v apt-get &>/dev/null; then
       apt-get update -qq
       apt-get install -y -qq docker-compose-plugin
+
   elif command -v dnf &>/dev/null; then
       dnf install -y docker-compose-plugin
+
   elif command -v yum &>/dev/null; then
       yum install -y docker-compose-plugin
+
   else
       echo "No supported package manager found"
       exit 1
@@ -366,8 +325,8 @@ services:
       - "3000:443"
     depends_on:
       - api-server
-    volumes:                                                                                                                                                                           
-      - ./certs:/etc/nginx/ssl                                                                                                                                                                            - ./certs:/etc/nginx/ssl
+    volumes:
+      - ./certs:/etc/nginx/ssl
 
   postgres:
     image: timescale/timescaledb:latest-pg16
@@ -402,48 +361,20 @@ volumes:
 COMPOSE
 echo -e "${GREEN}✓ docker-compose.yml created${NC}"
 
-# ─── Pull images with progress bar ───
-echo -e "${YELLOW}→ Pulling Docker images...${NC}"
-echo ""
+# ─── Pull and start ───
+echo -e "${YELLOW}→ Pulling images...${NC}"
+if ! docker compose pull -q; then
+  echo -e "${RED}✗ Failed to pull Docker images${NC}"
+  exit 1
+fi
 
-# List of images to pull
-IMAGES=("waf-core" "api-server" "frontend" "postgres" "redis")
-TOTAL_IMAGES=${#IMAGES[@]}
-CURRENT=0
-
-for img in "${IMAGES[@]}"; do
-  CURRENT=$((CURRENT + 1))
-  
-  # Display current image being pulled
-  printf "  [%d/%d] Pulling ${CYAN}%s${NC}...\n" "$CURRENT" "$TOTAL_IMAGES" "$img"
-  
-  # Pull with progress display
-  if docker compose pull "$img" 2>&1 | while IFS= read -r line; do
-    # Extract percentage from docker pull output
-    if [[ $line =~ ([0-9]+)% ]]; then
-      percent="${BASH_REMATCH[1]}"
-      show_progress "$percent" 100
-    fi
-  done; then
-    echo -e "\n  ${GREEN}✓ $img pulled successfully${NC}"
-  else
-    echo -e "\n  ${RED}✗ Failed to pull $img${NC}"
-    exit 1
-  fi
-  echo ""
-done
-
-echo -e "${GREEN}✓ All images pulled successfully${NC}"
-echo ""
-
-# ─── Start services ───
-echo -e "${YELLOW}→ Starting OGWAF services...${NC}"
+echo -e "${YELLOW}→ Starting OGWAF...${NC}"
 if ! docker compose up -d; then
   echo -e "${RED}✗ Failed to start OGWAF services${NC}"
   exit 1
 fi
 
-# ─── Setup heartbeat cron ───
+# ─── Setup heartbeat cron (before wait loop, so it's created even if script is interrupted) ───
 if ! cat > /etc/cron.d/ogwaf-heartbeat <<'CRON'
 0 */6 * * * root /opt/ogwaf/heartbeat.sh >/dev/null 2>&1
 CRON
@@ -461,129 +392,40 @@ fi
 HEARTBEAT
 chmod +x "$INSTALL_DIR/heartbeat.sh"
 
-# ─── Wait for healthy with improved method ───
+# ─── Wait for healthy ───
 echo -n "→ Waiting for services to be ready"
-HEALTH_OK=0
-
-# Give initial delay for containers to start properly
-sleep 10
-
-# Check and wait for services with improved method
-for i in $(seq 1 90); do
-  # Check if waf-core container is running
-  if docker ps | grep -q "ogwaf-waf-core"; then
-    # Try health check with curl (more reliable than wget)
-    if docker compose exec -T waf-core sh -c "curl -s http://localhost:8080/health 2>/dev/null | grep -q 'ok'" 2>/dev/null; then
-      echo ""
-      echo -e "${GREEN}✓ OGWAF is running!${NC}"
-      HEALTH_OK=1
-      break
-    fi
-    
-    # Alternative check using wget
-    if docker compose exec -T waf-core wget -qO- --timeout=5 http://localhost:8080/health 2>/dev/null | grep -q "ok"; then
-      echo ""
-      echo -e "${GREEN}✓ OGWAF is running!${NC}"
-      HEALTH_OK=1
-      break
-    fi
+for i in $(seq 1 60); do
+  if docker compose exec -T waf-core wget -qO- --timeout=5 http://localhost:8080/health 2>/dev/null | grep -q "ok"; then
+    echo ""
+    echo -e "${GREEN}✓ OGWAF is running!${NC}"
+    break
   fi
-  
-  # Progress indicator
   echo -n "."
-  
-  # Show status every 30 seconds for debugging
-  if [ $((i % 10)) -eq 0 ]; then
-    echo -n " (${i}s)"
-  fi
-  
   sleep 3
 done
-
-# If health check still fails, show diagnostic info but continue
-if [ $HEALTH_OK -eq 0 ]; then
-  echo ""
-  echo -e "${YELLOW}⚠ Health check timeout after 90 seconds${NC}"
-  echo -e "${YELLOW}  Container status:${NC}"
-  docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-  echo -e "${GREEN}  Continuing with installation...${NC}"
-fi
 
 # ─── Update super admin credentials ───
 if [ -n "$EMAIL" ] && [ -n "$PASSWORD" ]; then
   echo -e "${YELLOW}→ Updating admin credentials...${NC}"
 
-  # Capture ke local variable agar tidak hilang di subshell
-  _EMAIL="$EMAIL"
-  _PASSWORD="$PASSWORD"
-
-  # Wait for database to be ready
-  echo -n "  Waiting for database"
-  DB_READY=0
-  for i in $(seq 1 30); do
-    if docker compose exec -T postgres pg_isready -U waf -d wafdb >/dev/null 2>&1; then
-      DB_READY=1
-      echo ""
-      break
-    fi
-    echo -n "."
-    sleep 2
+  # Tunggu migration selesai (tabel users sudah ada)
+  for i in $(seq 1 10); do
+    docker compose exec -T postgres psql -U waf -d wafdb -c "SELECT 1 FROM users WHERE email='admin@waf.local'" >/dev/null 2>&1 && break
+    sleep 1
   done
-  
-  if [ $DB_READY -eq 0 ]; then
-    echo ""
-    echo -e "${YELLOW}  ⚠ Database not ready, skipping credential update${NC}"
+
+  # Inject langsung ke database via psql (pgcrypto untuk bcrypt hash)
+  if docker compose exec -T postgres psql -U waf -d wafdb -c "
+      UPDATE users
+      SET email = '$(echo "$EMAIL" | sed "s/'/''/g")',
+          password_hash = crypt('$(echo "$PASSWORD" | sed "s/'/''/g")', gen_salt('bf', 10))
+      WHERE role = 'super_admin'
+        AND email = 'admin@waf.local';
+    " >/dev/null 2>&1; then
+    echo -e "${GREEN}✓ Admin credentials updated (login: $EMAIL)${NC}"
   else
-    # Wait a bit more for migrations
-    sleep 5
-    
-    # Check if users table exists
-    TABLE_EXISTS=0
-    for i in $(seq 1 20); do
-      if docker compose exec -T postgres psql -U waf -d wafdb -c "SELECT 1 FROM users LIMIT 1" >/dev/null 2>&1; then
-        TABLE_EXISTS=1
-        break
-      fi
-      sleep 2
-    done
-    
-    if [ $TABLE_EXISTS -eq 0 ]; then
-      echo -e "${YELLOW}  ⚠ Users table not ready, skipping credential update${NC}"
-    else
-      # Escape single quotes for SQL safety
-      _EMAIL_ESC=$(printf '%s' "$_EMAIL" | sed "s/'/''/g")
-      _PASSWORD_ESC=$(printf '%s' "$_PASSWORD" | sed "s/'/''/g")
-
-      # Update super admin credentials
-      SQL="UPDATE users SET email = '$_EMAIL_ESC', password_hash = crypt('$_PASSWORD_ESC', gen_salt('bf', 10)) WHERE role = 'super_admin' AND email = 'admin@waf.local';"
-      
-      if echo "$SQL" | docker compose exec -T postgres psql -U waf -d wafdb >/dev/null 2>&1; then
-        echo -e "${GREEN}  ✓ Admin credentials updated (login: $_EMAIL)${NC}"
-      else
-        echo -e "${YELLOW}  ⚠ Could not update admin credentials (default: admin@waf.local / admin123)${NC}"
-      fi
-    fi
+    echo -e "${YELLOW}⚠ Could not update admin credentials (default: admin@waf.local / admin123)${NC}"
   fi
-fi
-
-# ─── Final check before summary ───
-echo ""
-echo -e "${CYAN}→ Final verification...${NC}"
-
-# Try one more health check if it failed earlier
-if [ $HEALTH_OK -eq 0 ]; then
-  echo -n "  Checking services one more time"
-  for i in $(seq 1 15); do
-    if docker compose exec -T waf-core sh -c "curl -s http://localhost:8080/health 2>/dev/null | grep -q 'ok'" 2>/dev/null; then
-      echo ""
-      echo -e "${GREEN}  ✓ OGWAF is now running!${NC}"
-      HEALTH_OK=1
-      break
-    fi
-    echo -n "."
-    sleep 2
-  done
-  echo ""
 fi
 
 # ─── Print summary ───
@@ -592,39 +434,16 @@ echo -e "${GREEN}═════════════════════
 echo -e "${GREEN}  OGWAF Installation Complete!${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════════${NC}"
 echo ""
-
-if [ $HEALTH_OK -eq 1 ]; then
-  echo -e "  Status:     ${GREEN}● Running${NC}"
-else
-  echo -e "  Status:     ${YELLOW}● Starting (check with 'docker compose ps')${NC}"
-fi
-
 echo -e "  Dashboard:  ${CYAN}https://${PUBLIC_IP}:3000${NC}"
 echo -e "  WAF HTTP:   ${CYAN}http://${PUBLIC_IP}:80${NC}"
 echo -e "  WAF HTTPS:  ${CYAN}https://${PUBLIC_IP}:443${NC}"
-
-if [ -n "$EMAIL" ] && [ -n "$PASSWORD" ]; then
-  echo -e "  Login:      ${GREEN}${EMAIL}${NC} / ${GREEN}${PASSWORD}${NC}"
-else
-  echo -e "  Login:      ${YELLOW}admin@waf.local${NC} / ${YELLOW}admin123${NC}"
-fi
-
 echo ""
-echo -e "  Portal:     ${CYAN}https://portal.origrata.com${NC}"
-echo -e "  License:    ${GREEN}$LICENSE_KEY${NC}"
+echo -e "  https://portal.origrata.com"
+echo -e "  Login:      ${EMAIL:-admin@waf.local} / ${PASSWORD:-admin123}"
+echo -e "  License:    $LICENSE_KEY"
 echo ""
-echo -e "${YELLOW}   Change default password immediately!${NC}"
+echo -e "${YELLOW}  ⚠ Change default password immediately!${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════════${NC}"
 echo ""
 echo -e "  Manage:  cd $INSTALL_DIR && docker compose [logs|restart|stop]"
 echo -e "  Update:  curl -sSL https://install.origrata.com/ogtech-waf.sh | bash -s -- --update"
-echo ""
-
-# Show running containers
-if docker ps | grep -q "ogwaf"; then
-  echo -e "${CYAN}→ Running containers:${NC}"
-  docker ps --format "table {{.Names}}\t{{.Status}}" | grep -E "ogwaf|NAMES"
-  echo ""
-fi
-
-exit 0
