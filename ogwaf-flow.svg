@@ -1,0 +1,239 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" font-family="Inter, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ef4444"/>
+      <stop offset="100%" style="stop-color:#dc2626"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#6d28d9"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b"/>
+      <stop offset="100%" style="stop-color:#d97706"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="700" fill="url(#bgGrad)"/>
+
+  <!-- Title -->
+  <text x="600" y="40" text-anchor="middle" fill="#f8fafc" font-size="22" font-weight="700">OGWAF — Request Processing Flow</text>
+  <text x="600" y="62" text-anchor="middle" fill="#94a3b8" font-size="12">AI-Driven Adaptive Web Application Firewall</text>
+
+  <!-- REQUEST IN (left) -->
+  <g filter="url(#shadow)">
+    <rect x="30" y="290" width="130" height="60" rx="10" fill="url(#blueGrad)"/>
+    <text x="95" y="315" text-anchor="middle" fill="white" font-size="11" font-weight="600">REQUEST</text>
+    <text x="95" y="333" text-anchor="middle" fill="#bfdbfe" font-size="10">HTTP/HTTPS</text>
+  </g>
+
+  <!-- Animated packet flow -->
+  <circle r="5" fill="#60a5fa" filter="url(#glow)">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 160,320 L 230,320"/>
+    <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- LAYER 1-3: Initial Checks -->
+  <g filter="url(#shadow)">
+    <rect x="240" y="260" width="140" height="120" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+    <rect x="240" y="260" width="140" height="28" rx="8" fill="#334155"/>
+    <text x="310" y="279" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="600">LAYER 1-3</text>
+    <text x="310" y="300" text-anchor="middle" fill="#e2e8f0" font-size="10">IP Check</text>
+    <text x="310" y="316" text-anchor="middle" fill="#e2e8f0" font-size="10">Body Size</text>
+    <text x="310" y="332" text-anchor="middle" fill="#e2e8f0" font-size="10">GeoIP Lookup</text>
+    <text x="310" y="348" text-anchor="middle" fill="#e2e8f0" font-size="10">Rate Limiting</text>
+    <text x="310" y="368" text-anchor="middle" fill="#64748b" font-size="8">~0.1ms</text>
+  </g>
+
+  <!-- Arrow 1→2 -->
+  <line x1="380" y1="320" x2="420" y2="320" stroke="#475569" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <circle r="4" fill="#3b82f6" filter="url(#glow)">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 380,320 L 420,320" begin="0.8s"/>
+    <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" begin="0.8s"/>
+  </circle>
+
+  <!-- LAYER 4-9: Security Checks -->
+  <g filter="url(#shadow)">
+    <rect x="425" y="230" width="150" height="180" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+    <rect x="425" y="230" width="150" height="28" rx="8" fill="#4c1d95"/>
+    <text x="500" y="249" text-anchor="middle" fill="#c4b5fd" font-size="9" font-weight="600">LAYER 4-9</text>
+    <text x="500" y="272" text-anchor="middle" fill="#e2e8f0" font-size="10">Challenge Cookie</text>
+    <text x="500" y="288" text-anchor="middle" fill="#e2e8f0" font-size="10">IP Reputation</text>
+    <text x="500" y="304" text-anchor="middle" fill="#e2e8f0" font-size="10">IP Deny List</text>
+    <text x="500" y="320" text-anchor="middle" fill="#e2e8f0" font-size="10">Bot Detection</text>
+    <text x="500" y="336" text-anchor="middle" fill="#e2e8f0" font-size="10">Trusted Bots (rDNS)</text>
+    <text x="500" y="352" text-anchor="middle" fill="#e2e8f0" font-size="10">Adaptive Threat</text>
+    <text x="500" y="368" text-anchor="middle" fill="#e2e8f0" font-size="10">HTTP Validation</text>
+    <text x="500" y="400" text-anchor="middle" fill="#64748b" font-size="8">~0.5ms</text>
+  </g>
+
+  <!-- Arrow 2→3 -->
+  <line x1="575" y1="320" x2="615" y2="320" stroke="#475569" stroke-width="2"/>
+  <circle r="4" fill="#8b5cf6" filter="url(#glow)">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 575,320 L 615,320" begin="1.6s"/>
+    <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" begin="1.6s"/>
+  </circle>
+
+  <!-- LAYER 10-14: Deep Inspection -->
+  <g filter="url(#shadow)">
+    <rect x="620" y="220" width="160" height="200" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+    <rect x="620" y="220" width="160" height="28" rx="8" fill="#7c2d12"/>
+    <text x="700" y="239" text-anchor="middle" fill="#fed7aa" font-size="9" font-weight="600">LAYER 10-14</text>
+    <text x="700" y="262" text-anchor="middle" fill="#e2e8f0" font-size="10">OWASP CRS</text>
+    <text x="700" y="278" text-anchor="middle" fill="#e2e8f0" font-size="10">Malware Scan</text>
+    <text x="700" y="294" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">Semantic AI (12 parsers)</text>
+    <text x="700" y="312" text-anchor="middle" fill="#94a3b8" font-size="9">SQLi · XSS · CMDi · SSTI</text>
+    <text x="700" y="326" text-anchor="middle" fill="#94a3b8" font-size="9">LFI · RFI · Recon · PHP</text>
+    <text x="700" y="344" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">AI Local Classifier</text>
+    <text x="700" y="360" text-anchor="middle" fill="#94a3b8" font-size="9">entropy · keywords · encoding</text>
+    <text x="700" y="376" text-anchor="middle" fill="#94a3b8" font-size="9">nesting · special chars</text>
+    <text x="700" y="394" text-anchor="middle" fill="#e2e8f0" font-size="10">Virtual Patching</text>
+    <text x="700" y="412" text-anchor="middle" fill="#64748b" font-size="8">~1.5ms (no API call)</text>
+  </g>
+
+  <!-- Arrow 3→4 -->
+  <line x1="780" y1="320" x2="820" y2="320" stroke="#475569" stroke-width="2"/>
+  <circle r="4" fill="#f59e0b" filter="url(#glow)">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 780,320 L 820,320" begin="2.4s"/>
+    <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" begin="2.4s"/>
+  </circle>
+
+  <!-- DECISION -->
+  <g filter="url(#shadow)">
+    <polygon points="890,280 940,320 890,360 840,320" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+    <text x="890" y="316" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="700">DECIDE</text>
+    <text x="890" y="330" text-anchor="middle" fill="#94a3b8" font-size="8">OpMode</text>
+  </g>
+
+  <!-- ALLOW path (right) -->
+  <line x1="940" y1="320" x2="990" y2="320" stroke="#10b981" stroke-width="2.5"/>
+  <g filter="url(#shadow)">
+    <rect x="995" y="290" width="130" height="60" rx="10" fill="url(#greenGrad)"/>
+    <text x="1060" y="315" text-anchor="middle" fill="white" font-size="11" font-weight="600">✓ ALLOW</text>
+    <text x="1060" y="333" text-anchor="middle" fill="#bbf7d0" font-size="10">→ Backend</text>
+  </g>
+  <circle r="5" fill="#10b981" filter="url(#glow)">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M 940,320 L 1000,320" begin="3.2s"/>
+    <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite" begin="3.2s"/>
+  </circle>
+
+  <!-- BLOCK path (down) -->
+  <line x1="890" y1="360" x2="890" y2="410" stroke="#ef4444" stroke-width="2.5"/>
+  <g filter="url(#shadow)">
+    <rect x="825" y="415" width="130" height="50" rx="10" fill="url(#redGrad)"/>
+    <text x="890" y="437" text-anchor="middle" fill="white" font-size="11" font-weight="600">✗ BLOCK</text>
+    <text x="890" y="453" text-anchor="middle" fill="#fecaca" font-size="10">403 Forbidden</text>
+  </g>
+
+  <!-- CHALLENGE path (up) -->
+  <line x1="890" y1="280" x2="890" y2="230" stroke="#f59e0b" stroke-width="2.5"/>
+  <g filter="url(#shadow)">
+    <rect x="825" y="175" width="130" height="50" rx="10" fill="url(#orangeGrad)"/>
+    <text x="890" y="197" text-anchor="middle" fill="white" font-size="11" font-weight="600">⚡ CHALLENGE</text>
+    <text x="890" y="213" text-anchor="middle" fill="#fef3c7" font-size="10">JS/PoW Verify</text>
+  </g>
+
+  <!-- Background AI Loop (bottom) -->
+  <g filter="url(#shadow)">
+    <rect x="240" y="520" width="700" height="130" rx="12" fill="#1e293b" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="4,4"/>
+    <rect x="240" y="520" width="700" height="28" rx="12" fill="#4c1d95"/>
+    <text x="590" y="539" text-anchor="middle" fill="#c4b5fd" font-size="10" font-weight="600">AI ADAPTIVE LEARNER — Background Loops (non-blocking)</text>
+  </g>
+
+  <!-- FP Review -->
+  <g>
+    <rect x="270" y="560" width="145" height="70" rx="6" fill="#312e81"/>
+    <text x="342" y="580" text-anchor="middle" fill="#a5b4fc" font-size="9" font-weight="600">FP Review</text>
+    <text x="342" y="596" text-anchor="middle" fill="#94a3b8" font-size="8">every 5 min</text>
+    <text x="342" y="612" text-anchor="middle" fill="#e2e8f0" font-size="8">Auto-whitelist FP</text>
+    <text x="342" y="624" text-anchor="middle" fill="#e2e8f0" font-size="8">Escalate real attacks</text>
+  </g>
+
+  <!-- Auto-Escalation -->
+  <g>
+    <rect x="430" y="560" width="145" height="70" rx="6" fill="#312e81"/>
+    <text x="502" y="580" text-anchor="middle" fill="#a5b4fc" font-size="9" font-weight="600">Auto-Escalation</text>
+    <text x="502" y="596" text-anchor="middle" fill="#94a3b8" font-size="8">every 2 min</text>
+    <text x="502" y="612" text-anchor="middle" fill="#e2e8f0" font-size="8">IP >5 hits → penalize</text>
+    <text x="502" y="624" text-anchor="middle" fill="#e2e8f0" font-size="8">reputation → block</text>
+  </g>
+
+  <!-- Rule Auto-Promotion -->
+  <g>
+    <rect x="590" y="560" width="145" height="70" rx="6" fill="#312e81"/>
+    <text x="662" y="580" text-anchor="middle" fill="#a5b4fc" font-size="9" font-weight="600">Rule Promotion</text>
+    <text x="662" y="596" text-anchor="middle" fill="#94a3b8" font-size="8">every 10 min</text>
+    <text x="662" y="612" text-anchor="middle" fill="#e2e8f0" font-size="8">AI generates rules</text>
+    <text x="662" y="624" text-anchor="middle" fill="#e2e8f0" font-size="8">confidence >85% → active</text>
+  </g>
+
+  <!-- AbuseIPDB Report -->
+  <g>
+    <rect x="750" y="560" width="145" height="70" rx="6" fill="#312e81"/>
+    <text x="822" y="580" text-anchor="middle" fill="#a5b4fc" font-size="9" font-weight="600">AbuseIPDB Report</text>
+    <text x="822" y="596" text-anchor="middle" fill="#94a3b8" font-size="8">on block</text>
+    <text x="822" y="612" text-anchor="middle" fill="#e2e8f0" font-size="8">Auto-report attackers</text>
+    <text x="822" y="624" text-anchor="middle" fill="#e2e8f0" font-size="8">Rate: 1/sec max</text>
+  </g>
+
+  <!-- Feedback arrows from decision to AI loop -->
+  <path d="M 700,420 L 700,460 Q 700,480 680,480 L 590,480 L 590,520" fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6"/>
+  <text x="720" y="475" fill="#8b5cf6" font-size="8">logged events</text>
+
+  <!-- Feedback arrow from AI loop back to security layers -->
+  <path d="M 340,520 L 340,480 Q 340,460 360,460 L 460,460 L 460,410" fill="none" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6"/>
+  <text x="400" y="455" fill="#8b5cf6" font-size="8">update rules/reputation</text>
+
+  <!-- Animated pulse in AI loop -->
+  <circle r="3" fill="#8b5cf6" opacity="0.8">
+    <animateMotion dur="6s" repeatCount="indefinite" path="M 270,595 L 900,595"/>
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="6s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Normalization badge -->
+  <g>
+    <rect x="620" y="85" width="160" height="45" rx="6" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+    <text x="700" y="103" text-anchor="middle" fill="#60a5fa" font-size="9" font-weight="600">Input Normalization</text>
+    <text x="700" y="118" text-anchor="middle" fill="#94a3b8" font-size="8">URL decode × 2 + HTML entity</text>
+    <text x="700" y="130" text-anchor="middle" fill="#94a3b8" font-size="8">+ Unicode fullwidth + null byte</text>
+  </g>
+  <line x1="700" y1="130" x2="700" y2="220" stroke="#3b82f6" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+
+  <!-- Stats badge -->
+  <g>
+    <rect x="30" y="85" width="180" height="80" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="120" y="105" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="600">PERFORMANCE</text>
+    <text x="120" y="125" text-anchor="middle" fill="#e2e8f0" font-size="10">Total latency: ~2ms</text>
+    <text x="120" y="142" text-anchor="middle" fill="#e2e8f0" font-size="10">12 parsers + AI classifier</text>
+    <text x="120" y="159" text-anchor="middle" fill="#10b981" font-size="10">Zero external API calls</text>
+  </g>
+
+  <!-- Legend -->
+  <g>
+    <rect x="30" y="600" width="180" height="80" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+    <text x="120" y="618" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="600">LEGEND</text>
+    <circle cx="50" cy="635" r="4" fill="#10b981"/><text x="65" y="639" fill="#e2e8f0" font-size="9">Allow → Backend</text>
+    <circle cx="50" cy="653" r="4" fill="#ef4444"/><text x="65" y="657" fill="#e2e8f0" font-size="9">Block → 403</text>
+    <circle cx="50" cy="671" r="4" fill="#f59e0b"/><text x="65" y="675" fill="#e2e8f0" font-size="9">Challenge → JS/PoW</text>
+  </g>
+</svg>
